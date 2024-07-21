@@ -22,6 +22,12 @@ def getText(m4a_file_path):
     subprocess.run(command, check=True)
 
 
+    # wavファイルから文字興しする
+    text = wav2text_speech_recognition(wav_audio_path)
+    return text
+
+
+def wav2text_speech_recognition(wav_audio_path):
     # 音声認識
     # Initialize the recognizer
     r = sr.Recognizer()
@@ -32,6 +38,7 @@ def getText(m4a_file_path):
         text = r.recognize_google(audio_data, language="ja-JP")
 
     return text
+
 
 if __name__=="__main__":
     text = getText("./data/_10452999.m4a")
