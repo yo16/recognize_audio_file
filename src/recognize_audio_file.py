@@ -1,7 +1,10 @@
 from dotenv import load_dotenv
 import os
+import io
 import subprocess
+
 import speech_recognition as sr
+from google.cloud import speech_v1p1beta1 as speech
 
 ## ffmpegをパスに追加
 load_dotenv()
@@ -24,6 +27,7 @@ def getText(m4a_file_path):
 
     # wavファイルから文字興しする
     text = wav2text_speech_recognition(wav_audio_path)
+    #text = wav2text_google_speech_to_text(wav_audio_path)
     return text
 
 
@@ -40,6 +44,29 @@ def wav2text_speech_recognition(wav_audio_path):
     return text
 
 
+# いちおう書いてみたSpeech to text版
+# 認証周りを一切やらずに書いただけなので、当然エラーになり、そこまでしかできていない状態
+def wav2text_google_speech_to_text(wav_audio_path):
+    client = speech.SpeechClient()
+
+    with io.open(wav_audio_path, "rb") as audio_file:
+        content = audio_file.read()
+
+    audio = speech.RecognitionAudio(content=content)
+    config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=16000,
+        language_code="ja-JP",
+    )
+
+    response = client.recognize(config=config, audio=audio)
+    text = ""
+    for result in response.results:
+        text += result.alternatives[0].transcript
+
+    return text
+
+
 if __name__=="__main__":
-    text = getText("./data/_10452999.m4a")
+    text = getText("./data/_10453009.m4a")
     print(text)
